@@ -1,0 +1,8 @@
+Version 1.2
+
+    • Arduino now sends two values (voltage on the potentiometer is now monitored)
+    • added “Open/Close” button to begin and quit serial communication by sending a token to Arduino
+    • added “Start/Pause” button to start, pause and resume monitoring on the webpage
+    • invalid values cannot be submitted in input forms and these are real-time updated for the database and the file row number values
+    • major design update and bug fixes
+    • added toggle dark mode

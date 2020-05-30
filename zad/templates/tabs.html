@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>                                 
+<!DOCTYPE html>                                 
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -16,22 +16,7 @@
     
     <script src="static/libs/plotly-latest.min.js"></script>
     <script src="static/libs/gauge.min.js"></script>
-    
-<!--
-    <script>
-      $( function() {
-        $( "#tabs" ).tabs;
-      } );
-    </script>
--->
-    
-    <script>
-      $( function() {
-        $( "#tabs" ).tabs({
-          event: "mouseover"
-        });
-      } );
-    </script>
+
 
 
     <script type="text/javascript" charset="utf-8">
@@ -43,40 +28,58 @@
       var y2min = 0;
       var y2max = 5; 
       
-      var layoutR1
-      var layoutR2
-      var layoutDB1 = {
+      var layoutR1 = {
+          plot_bgcolor: "#00000000",
+          paper_bgcolor: "#00000000",
           title: 'Servo position',
+          font: {
+              color: "#000000"
+          },
           xaxis: {
             title: '-->  t'
           },
           yaxis: {
-            title: '--> phi(t) [°]',
+            title: '-->  phi(t) [°]',
             range: [y1min,y1max]
           }
       };
-      var layoutDB2 = {
+      var layoutR2 = {
+          plot_bgcolor: "#00000000",
+          paper_bgcolor: "#00000000",
           title: 'Potentiometer voltage',
+          font: {
+              color: "#000000"
+          },
           xaxis: {
-            title: '--> t'
+            title: '-->  t'
           },
           yaxis: {
             title: '-->  U(t) [V]',
             range: [y2min,y2max]
           }
       };
-      var layoutFL1 = {
+      var layoutDBFL1 = {
+          plot_bgcolor: "#00000000",
+          paper_bgcolor: "#00000000",
           title: 'Servo position',
+          font: {
+              color: "#000000"
+          },
           xaxis: {
             title: '-->  t'
           },
           yaxis: {
-            title: '--> phi(t) [°]',
+            title: '-->  phi(t) [°]',
             range: [y1min,y1max]
           }
       };
-      var layoutFL2 = {
+      var layoutDBFL2 = {
+          plot_bgcolor: "#00000000",
+          paper_bgcolor: "#00000000",
           title: 'Potentiometer voltage',
+          font: {
+              color: "#000000"
+          },
           xaxis: {
             title: '-->  t'
           },
@@ -110,35 +113,30 @@
       var traceFL1;
       var traceFL2;
       
+      var dbMax;
+      var flMax;
+      var dark = 0;
+      var grafyR = 0;
+      var grafyDB = 0;
+      var grafyFL = 0;
+      
       var gauge = new RadialGauge({
           renderTo: 'gaugediv',
-          width: 200,
-          height: 200,
+          width: 300,
+          height: 300,
           units: "[°]",
-          minValue: -0,
+          minValue: 0,
           maxValue: 180,
           majorTicks: [
               "0",
-              "10",
-              "20",
               "30",
-              "40",
-              "50",
               "60",
-              "70",
-              "80",
               "90",
-              "100",
-              "110",
               "120",
-              "130",
-              "140",
               "150",
-              "160",
-              "170",
               "180"
           ],
-          minorTicks: 2,
+          minorTicks: 3,
           strokeTicks: true,
           highlights: [
               {
@@ -152,7 +150,11 @@
                   "color": "rgba(200, 50, 50, .75)"
               }
           ],
-          colorPlate: "#fff",
+          colorPlate: "#00000000",
+          colorNumbers: "#222222",
+          colorUnits: "#222222",
+          colorMajorTicks: "#000000",
+          colorMinorTicks: "#444444",
           borderShadowWidth: 0,
           borders: false,
           needleType: "arrow",
@@ -160,11 +162,13 @@
           needleCircleSize: 7,
           needleCircleOuter: true,
           needleCircleInner: false,
-          animationDuration: 1500,
-          animationRule: "linear"
+          animationDuration: 1000,
+          animationRule: "linear",
+          ticksAngle: 180,
+          startAngle: 90,
+          valueDec: 0
       });
       gauge.draw();
-      gauge.value = "0";
       
       
       
@@ -188,39 +192,44 @@
             xl.push(data[i].x);
             yPosl.push(data[i].yPos);
             yVoll.push(data[i].yVol);}
-          let traceDB1 = [{
+          traceDB1 = [{
               x: xl,
               y: yPosl,
               name:"Position",
               mode:'lines+markers',
               marker: {
                 color: 'rgb(204,0,0)',
-                size:8
+                size: 8
               },
               line: {
                 color: 'rgb(255,0,0)',
-                width:1
+                width: 1,
+                shape: 'spline'
               }
           }];
-          let traceDB2 = [{
+          traceDB2 = [{
               x: xl,
               y: yVoll,
               name:"Voltage",
               mode:'lines+markers',
               marker: {
                 color: 'rgb(204,102,0)',
-                size:8
+                size: 8
               },
               line: {
                 color: 'rgb(255,128,0)',
-                width:1
+                width: 1,
+                shape: 'spline'
               }
           }];   
-          Plotly.newPlot($('#plotdivDB1')[0], traceDB1,layoutDB1);
-          Plotly.newPlot($('#plotdivDB2')[0], traceDB2,layoutDB2);
+          Plotly.newPlot($('#plotdivDB1')[0], traceDB1,layoutDBFL1);
+          Plotly.newPlot($('#plotdivDB2')[0], traceDB2,layoutDBFL2);
+          if (grafyDB == 0) {
+            grafyDB = 1;
+          }
         }
       }).done(function( o ) {
-          // do something
+
       });
           return false; });
       
@@ -246,39 +255,44 @@
             xl.push(data[i].x);
             yPosl.push(data[i].yPos);
             yVoll.push(data[i].yVol);}
-          let traceFL1 = [{
+          traceFL1 = [{
               x: xl,
               y: yPosl,
               name:"Position",
               mode:'lines+markers',
               marker: {
                 color: 'rgb(0,102,204)',
-                size:8
+                size: 8
               },
               line: {
                 color: 'rgb(0,128,255)',
-                width:1
+                width: 1,
+                shape: 'spline'
               }
           }];
-          let traceFL2 = [{
+          traceFL2 = [{
               x: xl,
               y: yVoll,
               name:"Voltage",
               mode:'lines+markers',
               marker: {
                 color: 'rgb(0,204,204)',
-                size:8
+                size: 8
               },
               line: {
                 color: 'rgb(0,255,255)',
-                width:1
+                width: 1,
+                shape: 'spline'
               }
           }];   
-          Plotly.newPlot($('#plotdivFL1')[0], traceFL1,layoutFL1);
-          Plotly.newPlot($('#plotdivFL2')[0], traceFL2,layoutFL2);
+          Plotly.newPlot($('#plotdivFL1')[0], traceFL1,layoutDBFL1);
+          Plotly.newPlot($('#plotdivFL2')[0], traceFL2,layoutDBFL2);
+          if (grafyFL == 0) {
+            grafyFL = 1;
+          }
         }
       }).done(function( o ) {
-          // do something
+
       });
           return false; });
       
@@ -311,7 +325,6 @@
         $('#log8').html(tmp8);
         $('#log9').html(tmp9);
         $('#log10').html(tmp10);
-        //$('#log').append('Received #'+msg.count+', Position: '+msg.dataPos+'°, Voltage: '+msg.dataVol+'V<br>').html();
         if (msg.count < 21) {
           xRmin = 0;
         }
@@ -322,71 +335,81 @@
         xR.push(msg.count);
         yPosR.push(msg.dataPos);
         yVolR.push(msg.dataVol);
-        let traceR1 = [{
+        traceR1 = [{
             x: xR,
             y: yPosR,
             name:"Position",
             mode:'lines+markers',
-              marker: {
-                color: 'rgb(0,204,0)',
-                size:8
-              },
-              line: {
-                color: 'rgb(0,255,0)',
-                width:1
+            marker: {
+              color: 'rgb(0,204,0)',
+              size: 8
+            },
+            line: {
+              color: 'rgb(0,255,0)',
+              width: 1,
+              shape: 'spline'
               }
         }];
-        let traceR2 = [{
+        traceR2 = [{
             x: xR,
             y: yVolR,
             name:"Voltage",
             mode:'lines+markers',
             marker: {
               color: 'rgb(102,204,0)',
-              size:8
+              size:8 
             },
             line: {
               color: 'rgb(128,255,0)',
-              width:1
+              width: 1,
+              shape: 'spline'
             }
         }];
-        layoutR1 = {
-            title: 'Servo position',
-            xaxis: {
-              title: '--> t',
-              range: [xRmin,xRmax]
-            },
-            yaxis: {
-              title: '--> phi(t) [°]',
-              range: [y1min,y1max]
-            }
-        };
-        layoutR2 = {
-            title: 'Potentiometer voltage',
-            xaxis: {
-              title: '--> t',
-              range: [xRmin,xRmax]
-            },
-            yaxis: {
-              title: '-->  U(t) [V]',
-              range: [y2min,y2max]
-            }
-        };
+        layoutR1.xaxis.range = [xRmin,xRmax]
+        layoutR2.xaxis.range = [xRmin,xRmax]
         Plotly.newPlot($('#plotdivR1')[0], traceR1,layoutR1);
         Plotly.newPlot($('#plotdivR2')[0], traceR2,layoutR2);
+        if (grafyR == 0) {
+          grafyR = 1;
+        }
         gauge.value = msg.dataPos;
       });
-      socket.on('my_response_set', function(msg) {        
+      socket.on('my_response_max', function(msg) {
+        dbMax = document.getElementById("value");
+        flMax = document.getElementById("value2");
+        if (msg.dbMax > 0) {
+          dbMax.setAttribute("max", msg.dbMax);
+          dbMax.removeAttribute("disabled", "");
+        }
+        else {
+          dbMax.setAttribute("placeholder", "No data in database!");
+          dbMax.setAttribute("disabled", "");
+        }
+        if (msg.flMax > 0) {
+          flMax.setAttribute("max", msg.flMax);
+          flMax.removeAttribute("disabled", "");
+        }
+        else {
+          flMax.setAttribute("placeholder", "No data in file!");
+          flMax.setAttribute("disabled", "");
+        }
+      });
+      socket.on('my_response_set', function(msg) {
         console.log('Received #'+msg.count+', Servo set to: '+msg.dataPos+'°');
       });
-      socket.on('my_response_cd', function(msg) {        
+      socket.on('my_response_cd', function(msg) {
         console.log('Received #'+msg.count+', '+msg.dataPos);
       });
         
         
         
       $('form#emit').submit(function(event) {
-          socket.emit('my_event', {value: $('#emit_value').val()});
+          if (($('#emit_value').val()) >= 0 && ($('#emit_value').val() <= 180)) {
+            socket.emit('my_event', {value: $('#emit_value').val()});
+          }
+          else {
+            alert("Invalid or out of range input value!\nPlease insert number from 0 to 180.");
+          }
           return false; });
       $('#buttonValOC').click(function(event) {
           socket.emit('oc_event', {value: $('#buttonValOC').val()});
@@ -397,100 +420,425 @@
           else {
             $(this).val("open");
             $(this).text("Open");
+            if ($('#buttonValPR').val() == "pause") {
+              $('#buttonValPR').text("Start");
+              $('#buttonValPR').val("resume");
+            }
+            if ($('#buttonValDB').val() == "write") {
+              $('#buttonValDB').text("Record");
+              $('#buttonValDB').val("record");
+            }
+          }
+          return false; });
+      $('#buttonValPR').click(function(event) {
+          socket.emit('pr_event', {value: $('#buttonValPR').val()});
+          if ($(this).val() == "resume") {
+            $(this).val("pause");
+            $(this).text("Pause");
+          }
+          else {
+            $(this).val("resume");
+            $(this).text("Resume");
           }
           return false; });
       $('#buttonValDB').click(function(event) {
           socket.emit('db_event', {value: $('#buttonValDB').val()});
-          if ($(this).val() == "start") {
-            $(this).val("stop");
-            $(this).text("Stop");
+          if ($(this).val() == "record") {
+            $(this).val("write");
+            $(this).text("Write");
           }
           else {
-            $(this).val("start");
-            $(this).text("Start");
+            $(this).val("record");
+            $(this).text("Record");
           }
           return false; });
-      $('form#disconnect').submit(function(event) {
-          if ($('#buttonValOC').val() == "close") {
-            socket.emit('oc_event', {value: "notopened"});
-            $('#buttonValOC').text("Open");
+      $('#buttonValDark').click(function(event) {
+          if (dark == 0) {
+            gauge.update({
+              colorNumbers: "#CCCCCC",
+              colorUnits: "#CCCCCC",
+              colorMajorTicks: "#DDDDDD",
+              colorMinorTicks: "#AAAAAA"
+            });
+            layoutR1.font.color = "#DDDDDD";
+            layoutR2.font.color = "#DDDDDD";
+            layoutDBFL1.font.color = "#DDDDDD";
+            layoutDBFL2.font.color = "#DDDDDD";
+            dark = 1;
+            $(this).text("Light mode");
+            $(this).val("dark");
           }
-          if ($('#buttonValDB').val() == "stop") {
-            socket.emit('db_event', {value: $('#buttonValDB').val()});
-            $('#buttonValDB').text("Start");
+          else {
+            gauge.update({
+              colorNumbers: "#222222",
+              colorUnits: "#222222",
+              colorMajorTicks: "#000000",
+              colorMinorTicks: "#444444"
+            });
+            layoutR1.font.color = "#000000";
+            layoutR2.font.color = "#000000";
+            layoutDBFL1.font.color = "#000000";
+            layoutDBFL2.font.color = "#000000";
+            dark = 0;
+            $(this).text("Dark mode");
+            $(this).val("light");
           }
-          socket.emit('disconnect_request');
+          if (grafyR == 1) {
+            Plotly.newPlot($('#plotdivR1')[0], traceR1,layoutR1);
+            Plotly.newPlot($('#plotdivR2')[0], traceR2,layoutR2);
+          }
+          if (grafyDB == 1) {
+            Plotly.newPlot($('#plotdivDB1')[0], traceDB1,layoutDBFL1);
+            Plotly.newPlot($('#plotdivDB2')[0], traceDB2,layoutDBFL2);
+          }
+          if (grafyFL == 1) {
+            Plotly.newPlot($('#plotdivFL1')[0], traceFL1,layoutDBFL1);
+            Plotly.newPlot($('#plotdivFL2')[0], traceFL2,layoutDBFL2);
+          }
           return false; });
       });
     </script>
+    <style>
+      h1 {
+
+      }
+      h2 {
+
+      }
+      .t3 {
+        font-size: 18px;
+      }
+      .button {
+        padding:0;
+        width: 100px;
+        height: 50px;
+        text-align: center;
+        font-family: verdana;
+        font-size: 17px;
+        border-radius: 7px;
+        display: inline-block;
+        margin: 8px 2px;
+        cursor: pointer;
+        outline: none;
+        transition-duration: 0.5s;
+      }
+      .button:hover {
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 12px 0 rgba(0, 0, 0, 0.19);
+      }
+      .button:active {
+        transform: translateY(3px);
+      }
+      .button1 {
+        background-color: white;
+        color: black;
+        border: 3px solid #008CBA;
+      }
+      .button1:hover {
+        background-color: #008CBA;
+        color: white;
+      }
+      .button1.dark-mode {
+        background-color: #008CBA;
+        color: white;
+        border: 3px solid #008CBA;
+      }
+      .button1.dark-mode:hover {
+        background-color: white;
+        color: black;
+      }
+      .button2 {
+        background-color: white;
+        color: black;
+        border: 3px solid #4CAF50;
+      }
+      .button2:hover {
+        background-color: #4CAF50;
+        color: white;
+      }
+      .button2.dark-mode {
+        background-color: #4CAF50;
+        color: white;
+        border: 3px solid #4CAF50;
+      }
+      .button2.dark-mode:hover {
+        background-color: white;
+        color: black;
+      }
+      .button3 {
+        background-color: white;
+        color: black;
+        border: 3px solid #f44336;
+      }
+      .button3:hover {
+        background-color: #f44336;
+        color: white;
+      }
+      .button3.dark-mode {
+        background-color: #f44336;
+        color: white;
+        border: 3px solid #f44336;
+      }
+      .button3.dark-mode:hover {
+        background-color: white;
+        color: black;
+      }
+      .button4 {
+        background-color: white;
+        color: black;
+        border: 3px solid #555555;
+      }
+      .button4:hover {
+        background-color: #555555;
+        color: white;
+      }
+      .button4.dark-mode {
+        background-color: #555555;
+        color: white;
+        border: 3px solid #555555;
+      }
+      .button4.dark-mode:hover {
+        background-color: white;
+        color: black;
+      }
+      .button5 {
+        background-color: white;
+        color: black;
+        border: 3px solid #a7a7a7;
+        font-size: 15px;
+      }
+      .button5:hover {
+        background-color: #a7a7a7;
+        color: black;
+      }
+      .button5.dark-mode {
+        background-color: #a7a7a7;
+        color: black;
+        border: 3px solid #a7a7a7;
+      }
+      .button5.dark-mode:hover {
+        background-color: white;
+        color: black;
+      }
+      .input {
+        width: 200px;
+        height: 30px;
+        font-family: verdana;
+        text-align: center;
+        border: 3px solid #a7a7a7;
+        border-radius: 7px;
+        margin: 8px 2px;
+      }
+      body {
+        font-family: verdana;
+        background-color: white;
+        color: black;
+        transition-duration: 0.5s;
+      }
+      .dark-mode {
+        background-color: #333333;
+        color: white;
+      }
+      
+      /* Style the tab */
+      .tab {
+        overflow: hidden;
+        border: 1px solid #a7a7a7;
+        background-color: #f1f1f1;
+        transition-duration: 0.5s;
+      }
+
+      /* Style the buttons inside the tab */
+      .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        font-family: verdana;
+        font-size: 17px;
+      }
+
+      /* Change background color of buttons on hover */
+      .tab button:hover {
+        background-color: #a7a7a7;
+        transition-duration: 0.5s;
+      }
+
+      /* Create an active/current tablink class */
+      .tab button.active {
+        background-color: #008CBA;
+        color: white;
+        transition-duration: 0.5s;
+      }
+      
+      /* Style the tab */
+      .tab.dark-mode {
+        border: 1px solid #5d5d5d;
+        background-color: #696969;
+      }
+      
+      /* Style the tab content */
+      .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: none;
+        animation: fadeEffect 1s;
+      }
+      @keyframes fadeEffect {
+        from {opacity: 0;}
+        to {opacity: 1;}
+      }
+      .hidden {
+        opacity: 0;
+      }
+      img {
+        position: absolute;
+        opacity: 1;
+        transition: opacity 0.5s linear;
+      }
+      .flashingBut {
+        animation: fade;
+        animation-name: flashing;
+        animation-duration: 1.5s;
+        animation-timing-funkcion: ease-in-out;
+        animation-iteration-count: infinite;
+      }
+      @keyframes flashing {
+        from {opacity: 1.00;}
+        50% {opacity: 0.21;}
+        to {opacity: 1.00;}
+      }
+    </style>
   </head>
   <body>
-    <div id="tabs">
-      <ul>
-        <li><a href="#tabs-1">Overview: Real-time data</a></li>
-        <li><a href="#tabs-2">Database and file content</a></li>
-      </ul>
-      <div id="tabs-1">
-        <h1>Position of servomotor</h1>
+      <div class="tab" id="tab">
+        <button class="tablinks" onclick="openTab(event, 'tabs-1')" id="defaultOpen">Overview: Real-time data</button>
+        <button class="tablinks" onclick="openTab(event, 'tabs-2')">Database and file content</button>
+        <button id="buttonValDark" class="tablinks" onclick="darkToggle()" style="float: right;" value="light">Dark mode</button>
+      </div>
+      <div class="tabcontent" id="tabs-1">
         <table width="1350"><tbody>
-          <tr>
-            <td colspan="2" width="300">
-              <h2 align="left">Send:</h2>
+          <tr height="85">
+            <td colspan="2" width="350">
+              <div id="container">
+                <!-- <img class="image1" src="http://www.dzonatan.szm.com/logouamt.png" width="350">
+                <img class="hidden image2" src="http://www.dzonatan.szm.com/logouamt4.jpg" width="350"> -->
+              </div>
             </td>
             <td colspan="2" width="1000" align="center">
+              <h1>Position of servomotor</h1>
+            </td>
+          </tr>
+        </tbody></table>
+        <table width="1350"><tbody>
+          <tr>
+            <td colspan="3" width="350">
+            </td>
+            <td colspan="3" width="500" align="center">
+              <h2 align="center">Send:</h2>
+            </td>
+            <td colspan="3" width="500" align="center">
               <h2 align="center">Receive:</h2>
             </td>
           </tr>
         </tbody></table>
         <table width="1350"><tbody>
-            <tr height="200">
-              <td colspan="2" width="300" style="text-align:left;vertical-align:top;paddind:0">
+            <tr height="230">
+              <td colspan="3" width="350" style="text-align:center;vertical-align:center;padding:0">
+                <form><button id="buttonValOC" class="button button1" type="submit" value="open" onclick="stopBlink()">Open</button></form>
+                <form><button id="buttonValPR" class="button button2" type="submit" value="resume">Start</button></form>
+                <form><button id="buttonValDB" class="button button3" type="submit" value="record" onclick="but3toggle()">Record</button></form>
+                <script>
+                  function but3toggle() {
+                    var but3 = document.getElementById("buttonValDB")
+                    but3.classList.toggle("flashingBut");
+                    var drk = document.getElementById("buttonValDark");
+                    if (drk.value == "light") {
+                      but3.classList.toggle("dark-mode");
+                    }
+                  }
+                  function stopBlink() {
+                    var cls = document.getElementById("buttonValOC");
+                    var but3 = document.getElementById("buttonValDB");
+                    var drk = document.getElementById("buttonValDark");
+                    but3.classList.remove("flashingBut");
+                    if (drk.value == "light") {
+                      but3.classList.remove("dark-mode");
+                    }
+                  }
+                </script>
+              </td>
+              <td colspan="3" width="500" style="text-align:center;vertical-align:center;padding:0">
                 <form id="emit" method="POST" action='#'>
-                  <input type="text" name="emit_value" id="emit_value" placeholder="Manual set">
-                  <input type="submit" value="Send">
-                </form>
-                <button id="buttonValOC" type="submit" value="open">Open</button>
-                <button id="buttonValDB" type="submit" value="start">Start</button>
-                <form id="disconnect" method="POST" action="#">
-                  <input type="submit" value="Disconnect">
+                  <form><input class="input" type="number" min="0" max="180" name="emit_value" id="emit_value" placeholder="Manual set"><br>
+                  <input class="button button4" style="width:100px;height:50px" type="submit" value="Send"></form>
+                  <script>
+                    function darkToggle() {
+                      var element = document.body;
+                      element.classList.toggle("dark-mode");
+                      var but3 = document.getElementById("buttonValDB")
+                      var array_but = document.getElementsByClassName("button");
+                      for(var i = 0, len = array_but.length; i < len; i = i + 1) {
+                        array_but[i].classList.toggle("dark-mode");
+                      }
+                      if (but3.value == "write") {
+                        but3.classList.add("dark-mode");
+                      }
+                      var array_tab = document.getElementsByClassName("tab");
+                        for(var i = 0, len = array_tab.length; i < len; i = i + 1) {
+                          array_tab[i].classList.toggle("dark-mode");
+                        }
+                      $('img').toggleClass('hidden');
+                    }
+                  </script>
                 </form>
               </td>
-              <td colspan="2" width="1000" style="text-align:center;vertical-align:top;paddind:0">
-                <div id="log1"></div>
-                <div id="log2"></div>
-                <div id="log3"></div>
-                <div id="log4"></div>
-                <div id="log5"></div>
-                <div id="log6"></div>
-                <div id="log7"></div>
-                <div id="log8"></div>
-                <div id="log9"></div>
-                <div id="log10"></div>
+              <td colspan="3" width="500" style="text-align:center;vertical-align:top;padding:0">
+                <div class="t3" id="log1"></div>
+                <div class="t3" id="log2"></div>
+                <div class="t3" id="log3"></div>
+                <div class="t3" id="log4"></div>
+                <div class="t3" id="log5"></div>
+                <div class="t3" id="log6"></div>
+                <div class="t3" id="log7"></div>
+                <div class="t3" id="log8"></div>
+                <div class="t3" id="log9"></div>
+                <div class="t3" id="log10"></div>
               </td>
             </tr>
         </tbody></table>
         <table width="1350"><tbody>
-            <tr height="300">
-              <td colspan="3" width="300" align="left">
+            <tr height="370">
+              <td colspan="3" width="350" align="center" style="vertical-align:bottom;padding:0">
                 <canvas id="gaugediv"></canvas>
               </td>
-              <td colspan="3" align="center">
+              <td colspan="3" align="center" style="vertical-align:top;padding:0">
                 <div id="plotdivR1" style="width:500px;height:300px;"></div>
               </td>
-              <td colspan="3" align="center">
+              <td colspan="3" align="center" style="vertical-align:top;padding:0">
                 <div id="plotdivR2" style="width:500px;height:300px;"></div>
               </td>
             </tr>
         </tbody></table>
       </div>
-      <div id="tabs-2">
-        <h2>Data from database:</h2>
+      <div class="tabcontent" id="tabs-2">
+        <table width="1350"><tbody>
+          <tr height="85">
+            <td colspan="2" width="350">
+              <!-- <img id="img2" src="http://www.dzonatan.szm.com/logouamt.png" width="350"> -->
+            </td>
+            <td colspan="2" width="1000" align="center">
+            </td>
+          </tr>
+        </tbody></table>
         <table width="1350"><tbody>
             <tr height="300">
-              <td colspan="3" width="300" style="text-align:left;vertical-align:top;paddind:0">
+              <td colspan="3" width="350" style="text-align:left;vertical-align:center;padding:0">
+                <h2 style="text-align:left;vertical-align:center;padding:0">Data from database:</h2>
                 <form id="record" method="POST" action='#'>
-                  <input type="text" name="value" id="value" placeholder="Record No. from DB">
-                  <input type="submit" value="Set">
+                  <input class="input" type="number" min="1" name="value" id="value" placeholder="Select No. from DB">
+                  <input class="button button4" style="width:50px;height:37px;position:relative;top:2px" type="submit" value="Go">
                 </form>
               </td>
               <td colspan="3" align="center">
@@ -500,13 +848,13 @@
                 <div id="plotdivDB2" style="width:500px;height:300px;"></div>
               </td>
         </tbody></table>
-        <h2>Data from file:</h2>
         <table width="1350"><tbody>
             <tr height="300">
-              <td colspan="3" width="300" style="text-align:left;vertical-align:top;paddind:0">
+              <td colspan="3" width="350" style="text-align:left;vertical-align:center;padding:0">
+                <h2 style="text-align:left;vertical-align:center;padding:0">Data from file:</h2>
                 <form id="record2" method="POST" action='#'>
-                  <input type="text" name="value2" id="value2" placeholder="Record No. from File">
-                  <input type="submit" value="Set">
+                  <input class="input" type="number" min="1" name="value2" id="value2" placeholder="Select No. from File">
+                  <input class="button button4" style="width:50px;height:37px;position:relative;top:2px" type="submit" value="Go">
                 </form>
               </td>
               <td colspan="3" align="center">
@@ -518,7 +866,23 @@
             </tr>
         </tbody></table>
       </div>
-    </div>
- 
+    <script>
+      function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+      }
+    </script>
+    <script>
+      document.getElementById("defaultOpen").click();
+    </script>
   </body>
 </html>
