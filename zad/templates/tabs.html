@@ -1,0 +1,524 @@
+<!DOCTYPE HTML>                                 
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>POIT 2020</title>
+    <style type="text/css">           
+    </style>
+    <link rel="stylesheet" href="static/jquery-ui.min.css">
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    
+    <script src="static/jquery-1.11.1.min.js"></script>
+    <script src="static/jquery-3.2.1.min.js"></script>
+    <script src="static/jquery-ui.min.js"></script>
+    
+    <script src="static/libs/plotly-latest.min.js"></script>
+    <script src="static/libs/gauge.min.js"></script>
+    
+<!--
+    <script>
+      $( function() {
+        $( "#tabs" ).tabs;
+      } );
+    </script>
+-->
+    
+    <script>
+      $( function() {
+        $( "#tabs" ).tabs({
+          event: "mouseover"
+        });
+      } );
+    </script>
+
+
+    <script type="text/javascript" charset="utf-8">
+     $(document).ready(function() {
+      var xRmin;
+      var xRmax;
+      var y1min = 0;
+      var y1max = 180;
+      var y2min = 0;
+      var y2max = 5; 
+      
+      var layoutR1
+      var layoutR2
+      var layoutDB1 = {
+          title: 'Servo position',
+          xaxis: {
+            title: '-->  t'
+          },
+          yaxis: {
+            title: '--> phi(t) [°]',
+            range: [y1min,y1max]
+          }
+      };
+      var layoutDB2 = {
+          title: 'Potentiometer voltage',
+          xaxis: {
+            title: '--> t'
+          },
+          yaxis: {
+            title: '-->  U(t) [V]',
+            range: [y2min,y2max]
+          }
+      };
+      var layoutFL1 = {
+          title: 'Servo position',
+          xaxis: {
+            title: '-->  t'
+          },
+          yaxis: {
+            title: '--> phi(t) [°]',
+            range: [y1min,y1max]
+          }
+      };
+      var layoutFL2 = {
+          title: 'Potentiometer voltage',
+          xaxis: {
+            title: '-->  t'
+          },
+          yaxis: {
+            title: '-->  U(t) [V]',
+            range: [y2min,y2max]
+          }
+      };
+      
+      var xR = new Array();
+      var yPosR = new Array();
+      var yVolR = new Array();
+      
+      var tmp1="";
+      var tmp2="";
+      var tmp3="";
+      var tmp4="";
+      var tmp5="";
+      var tmp6="";
+      var tmp7="";
+      var tmp8="";
+      var tmp9="";
+      var tmp10="";
+      
+      var x = new Array();
+      var y = new Array();
+      var traceR1;
+      var traceR2;
+      var traceDB1;
+      var traceDB2;
+      var traceFL1;
+      var traceFL2;
+      
+      var gauge = new RadialGauge({
+          renderTo: 'gaugediv',
+          width: 200,
+          height: 200,
+          units: "[°]",
+          minValue: -0,
+          maxValue: 180,
+          majorTicks: [
+              "0",
+              "10",
+              "20",
+              "30",
+              "40",
+              "50",
+              "60",
+              "70",
+              "80",
+              "90",
+              "100",
+              "110",
+              "120",
+              "130",
+              "140",
+              "150",
+              "160",
+              "170",
+              "180"
+          ],
+          minorTicks: 2,
+          strokeTicks: true,
+          highlights: [
+              {
+                  "from": 0,
+                  "to": 30,
+                  "color": "rgba(200, 50, 50, .75)"
+              },
+              {
+                  "from": 150,
+                  "to": 180,
+                  "color": "rgba(200, 50, 50, .75)"
+              }
+          ],
+          colorPlate: "#fff",
+          borderShadowWidth: 0,
+          borders: false,
+          needleType: "arrow",
+          needleWidth: 2,
+          needleCircleSize: 7,
+          needleCircleOuter: true,
+          needleCircleInner: false,
+          animationDuration: 1500,
+          animationRule: "linear"
+      });
+      gauge.draw();
+      gauge.value = "0";
+      
+      
+      
+      $('form#record').submit(function(event) {
+          var $link = "/dbdata/"+$('#value').val();
+      $.ajax({
+        type: "POST",
+        url: $link,
+        success:function(data) 
+        { console.log(data);  
+          data = JSON.parse(data);
+          console.log(data);    
+          n = Object.keys(data).length;
+          console.log(n);
+        
+          xl = [];
+          yPosl = [];
+          yVoll = [];
+
+          for (var i=0; i< n; i++){
+            xl.push(data[i].x);
+            yPosl.push(data[i].yPos);
+            yVoll.push(data[i].yVol);}
+          let traceDB1 = [{
+              x: xl,
+              y: yPosl,
+              name:"Position",
+              mode:'lines+markers',
+              marker: {
+                color: 'rgb(204,0,0)',
+                size:8
+              },
+              line: {
+                color: 'rgb(255,0,0)',
+                width:1
+              }
+          }];
+          let traceDB2 = [{
+              x: xl,
+              y: yVoll,
+              name:"Voltage",
+              mode:'lines+markers',
+              marker: {
+                color: 'rgb(204,102,0)',
+                size:8
+              },
+              line: {
+                color: 'rgb(255,128,0)',
+                width:1
+              }
+          }];   
+          Plotly.newPlot($('#plotdivDB1')[0], traceDB1,layoutDB1);
+          Plotly.newPlot($('#plotdivDB2')[0], traceDB2,layoutDB2);
+        }
+      }).done(function( o ) {
+          // do something
+      });
+          return false; });
+      
+      
+      
+      $('form#record2').submit(function(event) {
+          var $link = "/fldata/"+$('#value2').val();
+      $.ajax({
+        type: "GET",
+        url: $link,
+        success:function(data) 
+        { console.log(data);  
+          data = JSON.parse(data);
+          console.log(data);    
+          n = Object.keys(data).length;
+          console.log(n);
+        
+          xl = [];
+          yPosl = [];
+          yVoll = [];
+
+          for (var i=0; i< n; i++){
+            xl.push(data[i].x);
+            yPosl.push(data[i].yPos);
+            yVoll.push(data[i].yVol);}
+          let traceFL1 = [{
+              x: xl,
+              y: yPosl,
+              name:"Position",
+              mode:'lines+markers',
+              marker: {
+                color: 'rgb(0,102,204)',
+                size:8
+              },
+              line: {
+                color: 'rgb(0,128,255)',
+                width:1
+              }
+          }];
+          let traceFL2 = [{
+              x: xl,
+              y: yVoll,
+              name:"Voltage",
+              mode:'lines+markers',
+              marker: {
+                color: 'rgb(0,204,204)',
+                size:8
+              },
+              line: {
+                color: 'rgb(0,255,255)',
+                width:1
+              }
+          }];   
+          Plotly.newPlot($('#plotdivFL1')[0], traceFL1,layoutFL1);
+          Plotly.newPlot($('#plotdivFL2')[0], traceFL2,layoutFL2);
+        }
+      }).done(function( o ) {
+          // do something
+      });
+          return false; });
+      
+      
+      
+      namespace = '/test';
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+      socket.on('connect', function() {
+        socket.emit('my_event', {data: 'I\'m connected!', value: 1}); });
+
+      socket.on('my_response', function(msg) {
+        tmp1=tmp2;
+        tmp2=tmp3;
+        tmp3=tmp4;
+        tmp4=tmp5;
+        tmp5=tmp6;
+        tmp6=tmp7;
+        tmp7=tmp8;
+        tmp8=tmp9;
+        tmp9=tmp10;
+        tmp10='Received #'+msg.count+', Position: '+msg.dataPos+'°, Voltage: '+msg.dataVol+'V<br>';
+        $('#log1').html(tmp1);
+        $('#log2').html(tmp2);
+        $('#log3').html(tmp3);
+        $('#log4').html(tmp4);
+        $('#log5').html(tmp5);
+        $('#log6').html(tmp6);
+        $('#log7').html(tmp7);
+        $('#log8').html(tmp8);
+        $('#log9').html(tmp9);
+        $('#log10').html(tmp10);
+        //$('#log').append('Received #'+msg.count+', Position: '+msg.dataPos+'°, Voltage: '+msg.dataVol+'V<br>').html();
+        if (msg.count < 21) {
+          xRmin = 0;
+        }
+        else {
+          xRmin = msg.count - 21
+        }
+        xRmax = msg.count;
+        xR.push(msg.count);
+        yPosR.push(msg.dataPos);
+        yVolR.push(msg.dataVol);
+        let traceR1 = [{
+            x: xR,
+            y: yPosR,
+            name:"Position",
+            mode:'lines+markers',
+              marker: {
+                color: 'rgb(0,204,0)',
+                size:8
+              },
+              line: {
+                color: 'rgb(0,255,0)',
+                width:1
+              }
+        }];
+        let traceR2 = [{
+            x: xR,
+            y: yVolR,
+            name:"Voltage",
+            mode:'lines+markers',
+            marker: {
+              color: 'rgb(102,204,0)',
+              size:8
+            },
+            line: {
+              color: 'rgb(128,255,0)',
+              width:1
+            }
+        }];
+        layoutR1 = {
+            title: 'Servo position',
+            xaxis: {
+              title: '--> t',
+              range: [xRmin,xRmax]
+            },
+            yaxis: {
+              title: '--> phi(t) [°]',
+              range: [y1min,y1max]
+            }
+        };
+        layoutR2 = {
+            title: 'Potentiometer voltage',
+            xaxis: {
+              title: '--> t',
+              range: [xRmin,xRmax]
+            },
+            yaxis: {
+              title: '-->  U(t) [V]',
+              range: [y2min,y2max]
+            }
+        };
+        Plotly.newPlot($('#plotdivR1')[0], traceR1,layoutR1);
+        Plotly.newPlot($('#plotdivR2')[0], traceR2,layoutR2);
+        gauge.value = msg.dataPos;
+      });
+      socket.on('my_response_set', function(msg) {        
+        console.log('Received #'+msg.count+', Servo set to: '+msg.dataPos+'°');
+      });
+      socket.on('my_response_cd', function(msg) {        
+        console.log('Received #'+msg.count+', '+msg.dataPos);
+      });
+        
+        
+        
+      $('form#emit').submit(function(event) {
+          socket.emit('my_event', {value: $('#emit_value').val()});
+          return false; });
+      $('#buttonValOC').click(function(event) {
+          socket.emit('oc_event', {value: $('#buttonValOC').val()});
+          if ($(this).val() == "open") {
+            $(this).val("close");
+            $(this).text("Close");
+          }
+          else {
+            $(this).val("open");
+            $(this).text("Open");
+          }
+          return false; });
+      $('#buttonValDB').click(function(event) {
+          socket.emit('db_event', {value: $('#buttonValDB').val()});
+          if ($(this).val() == "start") {
+            $(this).val("stop");
+            $(this).text("Stop");
+          }
+          else {
+            $(this).val("start");
+            $(this).text("Start");
+          }
+          return false; });
+      $('form#disconnect').submit(function(event) {
+          if ($('#buttonValOC').val() == "close") {
+            socket.emit('oc_event', {value: "notopened"});
+            $('#buttonValOC').text("Open");
+          }
+          if ($('#buttonValDB').val() == "stop") {
+            socket.emit('db_event', {value: $('#buttonValDB').val()});
+            $('#buttonValDB').text("Start");
+          }
+          socket.emit('disconnect_request');
+          return false; });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="tabs">
+      <ul>
+        <li><a href="#tabs-1">Overview: Real-time data</a></li>
+        <li><a href="#tabs-2">Database and file content</a></li>
+      </ul>
+      <div id="tabs-1">
+        <h1>Position of servomotor</h1>
+        <table width="1350"><tbody>
+          <tr>
+            <td colspan="2" width="300">
+              <h2 align="left">Send:</h2>
+            </td>
+            <td colspan="2" width="1000" align="center">
+              <h2 align="center">Receive:</h2>
+            </td>
+          </tr>
+        </tbody></table>
+        <table width="1350"><tbody>
+            <tr height="200">
+              <td colspan="2" width="300" style="text-align:left;vertical-align:top;paddind:0">
+                <form id="emit" method="POST" action='#'>
+                  <input type="text" name="emit_value" id="emit_value" placeholder="Manual set">
+                  <input type="submit" value="Send">
+                </form>
+                <button id="buttonValOC" type="submit" value="open">Open</button>
+                <button id="buttonValDB" type="submit" value="start">Start</button>
+                <form id="disconnect" method="POST" action="#">
+                  <input type="submit" value="Disconnect">
+                </form>
+              </td>
+              <td colspan="2" width="1000" style="text-align:center;vertical-align:top;paddind:0">
+                <div id="log1"></div>
+                <div id="log2"></div>
+                <div id="log3"></div>
+                <div id="log4"></div>
+                <div id="log5"></div>
+                <div id="log6"></div>
+                <div id="log7"></div>
+                <div id="log8"></div>
+                <div id="log9"></div>
+                <div id="log10"></div>
+              </td>
+            </tr>
+        </tbody></table>
+        <table width="1350"><tbody>
+            <tr height="300">
+              <td colspan="3" width="300" align="left">
+                <canvas id="gaugediv"></canvas>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivR1" style="width:500px;height:300px;"></div>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivR2" style="width:500px;height:300px;"></div>
+              </td>
+            </tr>
+        </tbody></table>
+      </div>
+      <div id="tabs-2">
+        <h2>Data from database:</h2>
+        <table width="1350"><tbody>
+            <tr height="300">
+              <td colspan="3" width="300" style="text-align:left;vertical-align:top;paddind:0">
+                <form id="record" method="POST" action='#'>
+                  <input type="text" name="value" id="value" placeholder="Record No. from DB">
+                  <input type="submit" value="Set">
+                </form>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivDB1" style="width:500px;height:300px;"></div>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivDB2" style="width:500px;height:300px;"></div>
+              </td>
+        </tbody></table>
+        <h2>Data from file:</h2>
+        <table width="1350"><tbody>
+            <tr height="300">
+              <td colspan="3" width="300" style="text-align:left;vertical-align:top;paddind:0">
+                <form id="record2" method="POST" action='#'>
+                  <input type="text" name="value2" id="value2" placeholder="Record No. from File">
+                  <input type="submit" value="Set">
+                </form>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivFL1" style="width:500px;height:300px;"></div>
+              </td>
+              <td colspan="3" align="center">
+                <div id="plotdivFL2" style="width:500px;height:300px;"></div>
+              </td>
+            </tr>
+        </tbody></table>
+      </div>
+    </div>
+ 
+  </body>
+</html>

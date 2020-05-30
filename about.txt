@@ -1,0 +1,17 @@
+Servomotor position control and monitoring
+
+-	a simple web application to control and monitor 
+	the position of a servomotor
+
+-	servomotor is powered and controlled 
+	by an Arduino microcontroller 
+	which communicates with Raspberry 
+	through the serial port
+
+-	user can monitor the position 
+	displayed on real-time graphs and gauge 
+	and can set it manually on the webpage
+
+-	data can be archived in a database or a file 
+	and the content of the database or/and the file 
+	can be shown on the graphs
