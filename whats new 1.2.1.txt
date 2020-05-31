@@ -1,0 +1,4 @@
+Version 1.2.1
+
+    • user now can switch to radians as units and back to degrees
+    • minor bug fixes

@@ -28,6 +28,7 @@ A = '0'
 ocV = 'notopened'
 prV = 'notstarted'
 dbV = 'notrecording'
+flV = 'notrecording'
 sV = 'notset'
 
 def background_thread(args):
@@ -35,12 +36,14 @@ def background_thread(args):
     global ocV
     global prV
     global dbV
+    global flV
     global sV
     count = 0
     dataCounter = 0
     dataList = []
+    dataCounter2 = 0
+    dataList2 = []
     db = MySQLdb.connect(host=myhost,user=myuser,passwd=mypasswd,db=mydb)
-    cursor = db.cursor()
     pos = -1
     vol = -1
     ard = 0
@@ -53,8 +56,10 @@ def background_thread(args):
         timeout = 1
     )
     while True:
+        cursor = db.cursor()
         cursor.execute("SELECT MAX(id) FROM graph")
         maxid = cursor.fetchone()
+        db.commit()
         max_id = int(maxid[0]) - 1
         try:
             num_lines = sum(1 for line in open("static/files/test.txt"))
@@ -79,6 +84,7 @@ def background_thread(args):
             count += 1
             if prV == 'resume':
                 dataCounter +=1
+                dataCounter2 +=1
                 try:
                     pos = int(read_ser)
                     vol = float(read_ser2)
@@ -92,7 +98,7 @@ def background_thread(args):
                         "yPos": pos,
                         "yVol": vol}
                       dataList.append(dataDict)
-                      print('Capturing data..')
+                      print('Capturing data to database..')
                     else:
                       if len(dataList)>0:
                         fuj = str(dataList).replace("'", "\"")
@@ -102,17 +108,32 @@ def background_thread(args):
                         maxid = cursor.fetchone()
                         cursor.execute("INSERT INTO graph (id, hodnoty) VALUES (%s, %s)", (maxid[0] + 1, fuj))
                         db.commit()
+                        print('Data written to database.')
                         max_id = int(maxid[0])
+                      dataList = []
+                      dataCounter = 0
+                    if flV == 'record':
+                      dataDict2 = {
+                        "t": time.time(),
+                        "x": dataCounter2,
+                        "yPos": pos,
+                        "yVol": vol}
+                      dataList2.append(dataDict)
+                      print('Capturing data to file..')
+                    else:
+                      if len(dataList2)>0:
+                        fuj2 = str(dataList2).replace("'", "\"")
+                        print fuj2
                         str2 = "\r\n"
-                        str1 = str(fuj)
+                        str1 = str(fuj2)
                         str3 = str1 + str2
                         fo = open("static/files/test.txt","a+")
                         fo.write(str3)
                         fo.close()
-                        print('Data written.')
+                        print('Data written to file.')
                         num_lines = sum(1 for line in open("static/files/test.txt"))
-                      dataList = []
-                      dataCounter = 0
+                      dataList2 = []
+                      dataCounter2 = 0
                     if pos != -1:
                       socketio.emit('my_response',
                         {'dataPos': pos, 'dataVol': vol, 'count': count},
@@ -190,6 +211,11 @@ def oc_message(message):
 def db_message(message):   
     global dbV
     dbV = message['value']
+    
+@socketio.on('fl_event', namespace='/test')
+def fl_message(message):   
+    global flV
+    flV = message['value']
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
