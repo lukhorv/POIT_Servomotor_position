@@ -118,7 +118,7 @@ def background_thread(args):
                         "x": dataCounter2,
                         "yPos": pos,
                         "yVol": vol}
-                      dataList2.append(dataDict)
+                      dataList2.append(dataDict2)
                       print('Capturing data to file..')
                     else:
                       if len(dataList2)>0:
